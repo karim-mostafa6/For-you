@@ -22,7 +22,6 @@ body {
     width: 100vw;
 }
 
-/* ============ الخلفية ============ */
 .background {
     position: fixed;
     width: 100%;
@@ -97,7 +96,6 @@ body {
     50% { opacity: 0.9; }
 }
 
-/* نجمة ساقطة */
 .shooting-star {
     position: absolute;
     width: 2px;
@@ -125,7 +123,6 @@ body {
     100% { transform: translate(-260px, 260px); opacity: 0; }
 }
 
-/* ============ غلاف الرسالة (Envelope) ============ */
 .envelope-screen {
     position: fixed;
     inset: 0;
@@ -197,6 +194,7 @@ body {
 .envelope-hint {
     margin-top: 30px;
     font-size: 15px;
+    line-height: 1.9;
     color: rgba(255,255,255,0.6);
     animation: fadeBlink 2s ease-in-out infinite;
 }
@@ -206,7 +204,6 @@ body {
     50% { opacity: 1; }
 }
 
-/* ============ المحتوى ============ */
 .container {
     position: relative;
     z-index: 2;
@@ -334,9 +331,8 @@ button {
     overflow: visible;
 }
 
-.card.show button {
-    animation: fadeIn 1.2s ease forwards, glowPulse 2.5s ease-in-out infinite 3s;
-    animation-delay: 5.5s, 6s;
+.card.show button.visible {
+    animation: fadeIn 1.2s ease forwards, glowPulse 2.5s ease-in-out infinite 1.5s;
 }
 
 button:hover {
@@ -362,8 +358,8 @@ button:active {
     opacity: 0;
 }
 
-.card.show .hint {
-    animation: fadeIn 1.2s ease forwards 6s;
+.card.show .hint.visible {
+    animation: fadeIn 1.2s ease forwards;
 }
 
 .brand-signature {
@@ -378,8 +374,8 @@ button:active {
     text-transform: uppercase;
 }
 
-.card.show .brand-signature {
-    animation: fadeIn 1.5s ease forwards 7s;
+.card.show .brand-signature.visible {
+    animation: fadeIn 1.5s ease forwards 0.4s;
 }
 
 @keyframes fadeIn {
@@ -393,7 +389,6 @@ button:active {
     .card { padding: 40px 24px; }
 }
 
-/* تأثير خفيف عند الضغط في أي مكان بالصفحة */
 .tap-particle {
     position: fixed;
     pointer-events: none;
@@ -405,6 +400,7 @@ button:active {
     0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
     100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.1); opacity: 0; }
 }
+
 .open-burst {
     position: fixed;
     pointer-events: none;
@@ -416,6 +412,7 @@ button:active {
     0% { transform: translate(0,0) scale(0.5) rotate(0deg); opacity: 1; }
     100% { transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(var(--rot)); opacity: 0; }
 }
+
 .burst-heart {
     position: fixed;
     font-size: 20px;
@@ -429,16 +426,55 @@ button:active {
     0% { transform: translate(0,0) scale(0.6); opacity: 1; }
     100% { transform: translate(var(--dx), var(--dy)) scale(1.2); opacity: 0; }
 }
+
+#musicToggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(212,175,140,0.4);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    user-select: none;
+}
+
+#musicToggle.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#musicToggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+    transition: 0.3s;
+}
 </style>
 </head>
 
 <body>
 
+<div id="musicToggle" onclick="toggleMusic()">🔊</div>
+
+<!-- رابط البيانو الرومانسي الجديد -->
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+</audio>
+
 <div class="background" id="bg">
     <div class="glow"></div>
 </div>
 
-<!-- شاشة الغلاف -->
 <div class="envelope-screen" id="envelopeScreen" onclick="openEnvelope()">
     <div class="envelope">
         <div class="envelope-body"></div>
@@ -464,7 +500,6 @@ button:active {
 <script>
 const bg = document.getElementById("bg");
 
-/* صور ورد */
 const roses = [
     "https://cdn-icons-png.flaticon.com/512/616/616490.png",
     "https://cdn-icons-png.flaticon.com/512/2909/2909762.png"
@@ -526,7 +561,6 @@ setInterval(() => createElement("heart"), 750);
 setInterval(() => createElement("sparkle"), 500);
 setInterval(createShootingStar, 3500);
 
-/* ============ أصوات بسيطة (Web Audio API) ============ */
 let audioCtx;
 function getAudioCtx() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -536,7 +570,7 @@ function getAudioCtx() {
 function playChime() {
     const ctx = getAudioCtx();
     const now = ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99]; // دو - مي - صول
+    const notes = [523.25, 659.25, 783.99];
     notes.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -569,9 +603,41 @@ function playPop() {
     osc.stop(now + 0.2);
 }
 
-/* ============ فتح الغلاف ============ */
+let isMusicMuted = false;
+let envelopeOpened = false;
+const bgMusic = document.getElementById("bgMusic");
+if (bgMusic) bgMusic.volume = 0.5;
+
+function toggleMusic() {
+    const toggleBtn = document.getElementById("musicToggle");
+    if (isMusicMuted) {
+        bgMusic.play();
+        toggleBtn.innerHTML = "🔊";
+        isMusicMuted = false;
+    } else {
+        bgMusic.pause();
+        toggleBtn.innerHTML = "🔇";
+        isMusicMuted = true;
+    }
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        bgMusic.pause();
+    } else {
+        if (envelopeOpened && !isMusicMuted) {
+            bgMusic.play();
+        }
+    }
+});
+
 function openEnvelope() {
     playChime();
+    
+    envelopeOpened = true;
+    if (bgMusic) bgMusic.play().catch(e => console.log("Audio play blocked:", e));
+    document.getElementById("musicToggle").classList.add("visible");
+
     const screen = document.getElementById("envelopeScreen");
     const flap = document.querySelector(".envelope-flap");
     flap.style.transition = "transform 0.6s ease";
@@ -613,15 +679,12 @@ function triggerOpenBurst() {
     }
 }
 
-/* ============ تأثير الكتابة الحية ============ */
-/* ============ قراءة بيانات العميلة من اللينك ============ */
 const urlParams = new URLSearchParams(window.location.search);
 
 let clientName = urlParams.get("name");
 let songLink = urlParams.get("song") || "PUT_YOUR_SONG_LINK_HERE";
 let msgParam = urlParams.get("msg");
 
-// الصيغة الجديدة المضغوطة: ?d=xxxxx (بتحمل الاسم والرسالة واللينك كلهم مع بعض)
 const dParam = urlParams.get("d");
 if (dParam) {
     try {
@@ -631,16 +694,13 @@ if (dParam) {
         songLink = data.s || songLink;
         msgParam = Array.isArray(data.m) ? data.m.join("|") : msgParam;
     } catch (e) {
-        // لو فشل فك الضغط، هيستخدم القيم الافتراضية
     }
 }
 
-// اسم العميلة - يظهر بدل "إليكِ"
 if (clientName) {
     document.querySelector(".title").innerHTML = clientName + " ❤️";
 }
 
-// الرسالة - تُفصل الأسطر بعلامة | وتُميَّز الكلمات بعلامتي ‹ ›
 const lines = msgParam
     ? msgParam.split("|")
     : [
@@ -652,13 +712,22 @@ const lines = msgParam
         "وأن ‹قلبي› وجد مكانه أخيرًا ❤️"
     ];
 
+function showControls() {
+    document.querySelector("button").classList.add("visible");
+    document.querySelector(".hint").classList.add("visible");
+    document.querySelector(".brand-signature").classList.add("visible");
+}
+
 function startTypewriter() {
     const container = document.getElementById("message");
     container.innerHTML = "";
     let lineIndex = 0;
 
     function typeLine() {
-        if (lineIndex >= lines.length) return;
+        if (lineIndex >= lines.length) {
+            showControls();
+            return;
+        }
 
         const lineText = lines[lineIndex];
         const lineEl = document.createElement("span");
@@ -673,7 +742,6 @@ function startTypewriter() {
             return;
         }
 
-        // تحويل النص إلى مصفوفة أحرف مع علامة "مميز" للي جوه ‹...›
         const chars = [];
         let highlighted = false;
         for (const ch of lineText) {
@@ -689,6 +757,7 @@ function startTypewriter() {
         let charIndex = 0;
         const interval = setInterval(() => {
             charIndex++;
+
             let html = "";
             let i = 0;
             while (i < charIndex) {
@@ -714,7 +783,6 @@ function startTypewriter() {
     typeLine();
 }
 
-/* ============ تأثير الضغط في أي مكان ============ */
 const tapParticles = ["❤", "✨", "💫"];
 function spawnTapEffect(x, y) {
     const count = 2 + Math.floor(Math.random() * 2);
@@ -738,11 +806,10 @@ function spawnTapEffect(x, y) {
 }
 
 document.addEventListener("click", (e) => {
-    if (e.target.closest(".envelope-screen") || e.target.closest("button")) return;
+    if (e.target.closest(".envelope-screen") || e.target.closest("button") || e.target.closest("#musicToggle")) return;
     spawnTapEffect(e.clientX, e.clientY);
 });
 
-/* ============ زر الأغنية + انفجار قلوب ============ */
 function goToSong(e) {
     playPop();
     const rect = e.target.getBoundingClientRect();
