@@ -61,9 +61,9 @@ body {
 
 .heart {
     position: absolute;
-    color: #ff4d6d;
+    color: #ff6b85;
     animation: float linear infinite;
-    text-shadow: 0 0 8px rgba(255,77,109,0.8);
+    filter: drop-shadow(0 0 6px rgba(255,77,109,0.7));
     pointer-events: none;
 }
 
@@ -176,14 +176,101 @@ body {
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
 
-.envelope-heart {
+.wax-seal {
     position: absolute;
     top: 55%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 26px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
     z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 35% 30%, #b5384f, #6b1421 65%, #430c15);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.18), inset 0 -4px 7px rgba(0,0,0,0.45);
     animation: heartbeat 1.4s ease-in-out infinite;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.wax-seal::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 1px dashed rgba(212,175,140,0.55);
+}
+
+.wax-seal-print {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: repeating-radial-gradient(circle at 45% 45%, rgba(232,201,160,0.55) 0px, rgba(232,201,160,0.55) 1px, transparent 1.5px, transparent 3.2px);
+    opacity: 0.85;
+}
+
+.wax-seal.breaking {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.3);
+}
+
+.seal-half {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #b5384f, #6b1421 65%, #430c15);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.18);
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seal-half.left {
+    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+}
+
+.seal-half.right {
+    clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+}
+
+.seal-half.crack-left {
+    animation: crackLeft 0.9s ease-in forwards;
+}
+
+.seal-half.crack-right {
+    animation: crackRight 0.9s ease-in forwards;
+}
+
+@keyframes crackLeft {
+    0% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
+    100% { opacity: 0; transform: translate(calc(-50% - 26px), calc(-50% + 40px)) rotate(-50deg); }
+}
+
+@keyframes crackRight {
+    0% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
+    100% { opacity: 0; transform: translate(calc(-50% + 26px), calc(-50% + 40px)) rotate(50deg); }
+}
+
+.wax-shard {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #b5384f, #6b1421);
+    pointer-events: none;
+    z-index: 20;
+    animation: shardBurst 0.9s ease-out forwards;
+}
+
+@keyframes shardBurst {
+    0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
 }
 
 @keyframes heartbeat {
@@ -220,9 +307,11 @@ body {
     padding: 50px 40px;
     background: rgba(255,255,255,0.03);
     border: 1px solid transparent;
-    background-image: linear-gradient(rgba(15,3,9,0.75), rgba(15,3,9,0.75)), linear-gradient(135deg, #e8c9d0, #ff4d6d, #d4af8c, #ff4d6d, #e8c9d0);
+    background-image: linear-gradient(rgba(15,3,9,0.75), rgba(15,3,9,0.75)), linear-gradient(120deg, #e8c9d0, #ff4d6d, #d4af8c, #f0e0c8, #ff4d6d, #e8c9d0, #d4af8c);
     background-origin: border-box;
     background-clip: padding-box, border-box;
+    background-size: 100% 100%, 300% 300%;
+    background-position: 0 0, 0% 50%;
     border-radius: 28px;
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
@@ -235,6 +324,12 @@ body {
 .card.show {
     opacity: 1;
     transform: scale(1);
+    animation: shimmerBorder 7s linear infinite 1s;
+}
+
+@keyframes shimmerBorder {
+    0% { background-position: 0 0, 0% 50%; }
+    100% { background-position: 0 0, 300% 50%; }
 }
 
 .title {
@@ -415,7 +510,8 @@ button:active {
 
 .burst-heart {
     position: fixed;
-    font-size: 20px;
+    width: 20px;
+    height: 20px;
     color: #ff4d6d;
     pointer-events: none;
     z-index: 20;
@@ -479,7 +575,9 @@ button:active {
     <div class="envelope">
         <div class="envelope-body"></div>
         <div class="envelope-flap"></div>
-        <div class="envelope-heart">❤️</div>
+        <div class="wax-seal" id="waxSeal"><div class="wax-seal-print"></div></div>
+        <div class="seal-half left" id="sealHalfLeft"><div class="wax-seal-print"></div></div>
+        <div class="seal-half right" id="sealHalfRight"><div class="wax-seal-print"></div></div>
     </div>
     <div class="envelope-hint">اضغطي عشان تفتحي الرسالة</div>
     <div style="margin-top: 10px; font-size: 13px; color: rgba(255,255,255,0.45);">🎵 جهزي سماعاتك.. فيه موسيقى هادية جوة</div>
@@ -507,6 +605,11 @@ const roses = [
 ];
 const sparkles = ["✨", "💫", "⭐", "💎"];
 
+// قلب مرسوم بالكود (SVG) بدل الإيموجي - شكل أنعم ومتناسق مع ألوان البراند
+function heartSVG() {
+    return '<svg viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;"><path fill="currentColor" d="M23.6,0c-3,0-5.7,1.6-7.6,4.1C14.1,1.6,11.4,0,8.4,0C3.8,0,0,3.8,0,8.6c0,8.1,10.5,14.6,15.3,18.9c0.4,0.3,0.9,0.3,1.3,0C21.5,23.2,32,16.7,32,8.6C32,3.8,28.2,0,23.6,0z"/></svg>';
+}
+
 function createElement(type) {
     let el;
     if (type === "rose") {
@@ -521,8 +624,10 @@ function createElement(type) {
     } else {
         el = document.createElement("div");
         el.className = "heart";
-        el.innerHTML = "❤";
-        el.style.fontSize = (14 + Math.random() * 10) + "px";
+        el.innerHTML = heartSVG();
+        const size = 12 + Math.random() * 9;
+        el.style.width = size + "px";
+        el.style.height = size + "px";
     }
 
     el.style.left = Math.random() * 100 + "vw";
@@ -634,23 +739,72 @@ document.addEventListener("visibilitychange", () => {
 
 function openEnvelope() {
     playChime();
-    
+    breakWaxSeal();
+
     envelopeOpened = true;
     if (bgMusic) bgMusic.play().catch(e => console.log("Audio play blocked:", e));
     document.getElementById("musicToggle").classList.add("visible");
 
     const screen = document.getElementById("envelopeScreen");
     const flap = document.querySelector(".envelope-flap");
-    flap.style.transition = "transform 0.6s ease";
-    flap.style.transform = "rotateX(180deg)";
 
-    triggerOpenBurst();
+    // 1) الختم بيتكسر الأول (breakWaxSeal فوق)
+    // 2) بعدين الغطاء يتفتح لما الختم يخلص
+    setTimeout(() => {
+        flap.style.transition = "transform 0.6s ease";
+        flap.style.transform = "rotateX(180deg)";
+    }, 450);
 
+    // 3) القلوب والورد يطلعوا من جوه الظرف بعد ما الغطاء يتفتح شوية
+    setTimeout(() => {
+        triggerOpenBurst();
+    }, 850);
+
+    // 4) الظرف يختفي وتظهر الرسالة
     setTimeout(() => {
         screen.classList.add("hidden");
         document.getElementById("card").classList.add("show");
         startTypewriter();
-    }, 500);
+    }, 1350);
+}
+
+function breakWaxSeal() {
+    const seal = document.getElementById("waxSeal");
+    const halfLeft = document.getElementById("sealHalfLeft");
+    const halfRight = document.getElementById("sealHalfRight");
+    if (!seal) return;
+    const rect = seal.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    seal.classList.add("breaking");
+
+    if (halfLeft && halfRight) {
+        halfLeft.style.opacity = "1";
+        halfRight.style.opacity = "1";
+        halfLeft.classList.add("crack-left");
+        halfRight.classList.add("crack-right");
+        setTimeout(() => {
+            halfLeft.style.opacity = "0";
+            halfRight.style.opacity = "0";
+        }, 950);
+    }
+
+    for (let i = 0; i < 6; i++) {
+        const shard = document.createElement("div");
+        shard.className = "wax-shard";
+        shard.style.left = cx + "px";
+        shard.style.top = cy + "px";
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 25 + Math.random() * 45;
+        shard.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+        shard.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+        shard.style.setProperty("--rot", (Math.random() * 360 - 180) + "deg");
+
+        document.body.appendChild(shard);
+        setTimeout(() => shard.remove(), 1000);
+    }
 }
 
 function triggerOpenBurst() {
@@ -658,13 +812,24 @@ function triggerOpenBurst() {
     const rect = envelope.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const particles = ["❤", "🌹", "✨", "💫"];
+    const particles = ["heart", "🌹", "✨", "💫"];
 
     for (let i = 0; i < 30; i++) {
         const p = document.createElement("div");
         p.className = "open-burst";
-        p.innerHTML = particles[Math.floor(Math.random() * particles.length)];
-        p.style.fontSize = (16 + Math.random() * 16) + "px";
+        const chosen = particles[Math.floor(Math.random() * particles.length)];
+        const size = 16 + Math.random() * 16;
+
+        if (chosen === "heart") {
+            p.innerHTML = heartSVG();
+            p.style.color = "#ff6b85";
+            p.style.width = size + "px";
+            p.style.height = size + "px";
+        } else {
+            p.innerHTML = chosen;
+            p.style.fontSize = size + "px";
+        }
+
         p.style.left = cx + "px";
         p.style.top = cy + "px";
 
@@ -784,17 +949,27 @@ function startTypewriter() {
     typeLine();
 }
 
-const tapParticles = ["❤", "✨", "💫"];
+const tapParticles = ["heart", "✨", "💫"];
 function spawnTapEffect(x, y) {
     const count = 2 + Math.floor(Math.random() * 2);
     for (let i = 0; i < count; i++) {
         const p = document.createElement("div");
         p.className = "tap-particle";
-        p.innerHTML = tapParticles[Math.floor(Math.random() * tapParticles.length)];
+        const chosen = tapParticles[Math.floor(Math.random() * tapParticles.length)];
+        const size = 12 + Math.random() * 10;
+
+        p.style.color = "#ff6b85";
+        if (chosen === "heart") {
+            p.innerHTML = heartSVG();
+            p.style.width = size + "px";
+            p.style.height = size + "px";
+        } else {
+            p.innerHTML = chosen;
+            p.style.fontSize = size + "px";
+        }
+
         p.style.left = x + "px";
         p.style.top = y + "px";
-        p.style.fontSize = (12 + Math.random() * 10) + "px";
-        p.style.color = "#ff6b85";
 
         const angle = Math.random() * Math.PI * 2;
         const dist = 20 + Math.random() * 40;
@@ -820,7 +995,7 @@ function goToSong(e) {
     for (let i = 0; i < 14; i++) {
         const h = document.createElement("div");
         h.className = "burst-heart";
-        h.innerHTML = "❤";
+        h.innerHTML = heartSVG();
         const angle = Math.random() * Math.PI * 2;
         const dist = 60 + Math.random() * 80;
         h.style.setProperty("--dx", Math.cos(angle) * dist + "px");
