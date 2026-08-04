@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For You ❤️</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 
 <style>
 * { box-sizing: border-box; }
@@ -616,18 +617,30 @@ function triggerOpenBurst() {
 /* ============ قراءة بيانات العميلة من اللينك ============ */
 const urlParams = new URLSearchParams(window.location.search);
 
+let clientName = urlParams.get("name");
+let songLink = urlParams.get("song") || "PUT_YOUR_SONG_LINK_HERE";
+let msgParam = urlParams.get("msg");
+
+// الصيغة الجديدة المضغوطة: ?d=xxxxx (بتحمل الاسم والرسالة واللينك كلهم مع بعض)
+const dParam = urlParams.get("d");
+if (dParam) {
+    try {
+        const decompressed = LZString.decompressFromEncodedURIComponent(dParam);
+        const data = JSON.parse(decompressed);
+        clientName = data.n || clientName;
+        songLink = data.s || songLink;
+        msgParam = Array.isArray(data.m) ? data.m.join("|") : msgParam;
+    } catch (e) {
+        // لو فشل فك الضغط، هيستخدم القيم الافتراضية
+    }
+}
+
 // اسم العميلة - يظهر بدل "إليكِ"
-const clientName = urlParams.get("name");
 if (clientName) {
     document.querySelector(".title").innerHTML = clientName + " ❤️";
 }
 
-// لينك الأغنية - يستبدل اللينك الافتراضي
-const songLink = urlParams.get("song") || "PUT_YOUR_SONG_LINK_HERE";
-
 // الرسالة - تُفصل الأسطر بعلامة | وتُميَّز الكلمات بعلامتي ‹ ›
-// مثال: msg=معكِ%20‹كل›%20شيء%20حلو|أنتِ%20‹الفرحة›%20كلها
-const msgParam = urlParams.get("msg");
 const lines = msgParam
     ? msgParam.split("|")
     : [
